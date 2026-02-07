@@ -2,9 +2,17 @@ import { useParams } from 'react-router-dom';
 import { useRecipeStore } from './recipeStore';
 import EditRecipeForm from './EditRecipeForm';
 import DeleteRecipeButton from './DeleteRecipeButton';
+import { useRecipeStore } from './recipeStore';
+
 
 const RecipeDetails = () => {
   const { id } = useParams();
+  const addFavorite = useRecipeStore((state) => state.addFavorite);
+  const removeFavorite = useRecipeStore((state) => state.removeFavorite);
+  const favorites = useRecipeStore((state) => state.favorites);
+
+  const isFavorite = favorites.includes(recipe.id);
+
 
   const recipe = useRecipeStore((state) =>
     state.recipes.find((recipe) => recipe.id === Number(id))
@@ -22,6 +30,16 @@ const RecipeDetails = () => {
       {/* required literal usage */}
       <EditRecipeForm recipe={recipe} />
       <DeleteRecipeButton recipeId={recipe.id} />
+      <button
+  onClick={() =>
+    isFavorite
+      ? removeFavorite(recipe.id)
+      : addFavorite(recipe.id)
+  }
+>
+  {isFavorite ? "Remove Favorite" : "Add to Favorites"}
+</button>
+
     </div>
   );
 };
