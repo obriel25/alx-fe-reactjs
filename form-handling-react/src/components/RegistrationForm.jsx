@@ -1,100 +1,90 @@
-import { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
-export default function RegistrationForm() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState("");
-
-  const validate = () => {
-    let newErrors = {};
-
-    if (!username.trim()) {
-      newErrors.username = "Username is required";
-    }
-
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    }
-
-    if (!password.trim()) {
-      newErrors.password = "Password is required";
-    }
-
-    return newErrors;
+function formikForm() {
+  const initialValues = {
+    username: "",
+    email: "",
+    password: "",
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const validationSchema = Yup.object({
+    username: Yup.string()
+      .required("Username is required")
+      .min(3, "Must be at least 3 characters"),
+    email: Yup.string()
+      .email("Invalid email format")
+      .required("Email is required"),
+    password: Yup.string()
+      .required("Password is required")
+      .min(6, "Must be at least 6 characters"),
+  });
 
-    const validationErrors = validate();
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setErrors({});
-    setMessage("");
-
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, email, password }),
+  const onSubmit = (values, { resetForm }) => {
+    fetch("https://jsonplaceholder.typicode.com/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert("User registered successfully!");
+          resetForm();
+        }
+      })
+      .catch(() => {
+        alert("Something went wrong.");
       });
-
-      if (response.ok) {
-        setMessage("User registered successfully!");
-        setUsername("");
-        setEmail("");
-        setPassword("");
-      }
-    } catch (error) {
-      setMessage("Something went wrong.");
-    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Register (Controlled)</h2>
+    <div>
+      <h2>Register (Formik)</h2>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        {errors.username && <p>{errors.username}</p>}
-      </div>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={onSubmit}
+      >
+        {({ isSubmitting }) => (
+          <Form>
+            <div>
+              <Field
+                type="text"
+                name="username"
+                placeholder="Username"
+              />
+              <ErrorMessage name="username" component="p" />
+            </div>
 
-      <div>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {errors.email && <p>{errors.email}</p>}
-      </div>
+            <div>
+              <Field
+                type="email"
+                name="email"
+                placeholder="Email"
+              />
+              <ErrorMessage name="email" component="p" />
+            </div>
 
-      <div>
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {errors.password && <p>{errors.password}</p>}
-      </div>
+            <div>
+              <Field
+                type="password"
+                name="password"
+                placeholder="Password"
+              />
+              <ErrorMessage name="password" component="p" />
+            </div>
 
-      <button type="submit">Register</button>
-
-      {message && <p>{message}</p>}
-    </form>
+            <button type="submit" disabled={isSubmitting}>
+              Register
+            </button>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 }
+
+export default formikForm;
