@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { useState } from "react";
 
 import Home from "./pages/Home";
@@ -13,40 +13,38 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
-    <div>
-      <nav>
-        <Link to="/">Home</Link> |{" "}
-        <Link to="/profile">Profile</Link> |{" "}
-        <Link to="/blog/1">Blog 1</Link> |{" "}
-        <Link to="/blog/2">Blog 2</Link>
-      </nav>
+    <BrowserRouter>
+      <div>
+        <nav>
+          <Link to="/">Home</Link> |{" "}
+          <Link to="/profile">Profile</Link> |{" "}
+          <Link to="/blog/1">Blog 1</Link>
+        </nav>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        <Route
-          path="/login"
-          element={<Login setIsAuthenticated={setIsAuthenticated} />}
-        />
+          <Route
+            path="/login"
+            element={<Login setIsAuthenticated={setIsAuthenticated} />}
+          />
 
-        {/* Protected Route */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Profile />
-            </ProtectedRoute>
-          }
-        >
-          {/* Nested Routes */}
-          <Route path="details" element={<ProfileDetails />} />
-          <Route path="settings" element={<ProfileSettings />} />
-        </Route>
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="details" element={<ProfileDetails />} />
+            <Route path="settings" element={<ProfileSettings />} />
+          </Route>
 
-        {/* Dynamic Route */}
-        <Route path="/blog/:id" element={<BlogPost />} />
-      </Routes>
-    </div>
+          <Route path="/blog/:id" element={<BlogPost />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
