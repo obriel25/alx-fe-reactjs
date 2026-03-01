@@ -1,37 +1,54 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { useState } from "react";
 
-function formikForm() {
-  const initialValues = {
-    username: "",
-    email: "",
-    password: "",
+function RegistrationForm() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let newErrors = {};
+
+    if (!username.trim()) {
+      newErrors.username = "Username is required";
+    }
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    }
+
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    return newErrors;
   };
 
-  const validationSchema = Yup.object({
-    username: Yup.string()
-      .required("Username is required")
-      .min(3, "Must be at least 3 characters"),
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email is required"),
-    password: Yup.string()
-      .required("Password is required")
-      .min(6, "Must be at least 6 characters"),
-  });
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const onSubmit = (values, { resetForm }) => {
+    const validationErrors = validate();
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+
     fetch("https://jsonplaceholder.typicode.com/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ username, email, password }),
     })
       .then((response) => {
         if (response.ok) {
           alert("User registered successfully!");
-          resetForm();
+          setUsername("");
+          setEmail("");
+          setPassword("");
         }
       })
       .catch(() => {
@@ -40,51 +57,42 @@ function formikForm() {
   };
 
   return (
-    <div>
-      <h2>Register (Formik)</h2>
+    <form onSubmit={handleSubmit}>
+      <h2>Register (Controlled)</h2>
 
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={onSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <div>
-              <Field
-                type="text"
-                name="username"
-                placeholder="Username"
-              />
-              <ErrorMessage name="username" component="p" />
-            </div>
+      <div>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        {errors.username && <p>{errors.username}</p>}
+      </div>
 
-            <div>
-              <Field
-                type="email"
-                name="email"
-                placeholder="Email"
-              />
-              <ErrorMessage name="email" component="p" />
-            </div>
+      <div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        {errors.email && <p>{errors.email}</p>}
+      </div>
 
-            <div>
-              <Field
-                type="password"
-                name="password"
-                placeholder="Password"
-              />
-              <ErrorMessage name="password" component="p" />
-            </div>
+      <div>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        {errors.password && <p>{errors.password}</p>}
+      </div>
 
-            <button type="submit" disabled={isSubmitting}>
-              Register
-            </button>
-          </Form>
-        )}
-      </Formik>
-    </div>
+      <button type="submit">Register</button>
+    </form>
   );
 }
 
-export default formikForm;
+export default RegistrationForm;

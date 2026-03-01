@@ -1,7 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-export default function FormikForm() {
+function formikForm() {
   const initialValues = {
     username: "",
     email: "",
@@ -11,34 +11,32 @@ export default function FormikForm() {
   const validationSchema = Yup.object({
     username: Yup.string()
       .required("Username is required")
-      .min(3, "Minimum 3 characters"),
+      .min(3, "Must be at least 3 characters"),
     email: Yup.string()
       .email("Invalid email format")
       .required("Email is required"),
     password: Yup.string()
       .required("Password is required")
-      .min(6, "Minimum 6 characters"),
+      .min(6, "Must be at least 6 characters"),
   });
 
-  const onSubmit = async (values, { resetForm, setSubmitting }) => {
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
+  const onSubmit = (values, { resetForm }) => {
+    fetch("https://jsonplaceholder.typicode.com/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert("User registered successfully!");
+          resetForm();
+        }
+      })
+      .catch(() => {
+        alert("Something went wrong.");
       });
-
-      if (response.ok) {
-        alert("User registered successfully!");
-        resetForm();
-      }
-    } catch (error) {
-      alert("Something went wrong.");
-    }
-
-    setSubmitting(false);
   };
 
   return (
@@ -53,22 +51,34 @@ export default function FormikForm() {
         {({ isSubmitting }) => (
           <Form>
             <div>
-              <Field type="text" name="username" placeholder="Username" />
+              <Field
+                type="text"
+                name="username"
+                placeholder="Username"
+              />
               <ErrorMessage name="username" component="p" />
             </div>
 
             <div>
-              <Field type="email" name="email" placeholder="Email" />
+              <Field
+                type="email"
+                name="email"
+                placeholder="Email"
+              />
               <ErrorMessage name="email" component="p" />
             </div>
 
             <div>
-              <Field type="password" name="password" placeholder="Password" />
+              <Field
+                type="password"
+                name="password"
+                placeholder="Password"
+              />
               <ErrorMessage name="password" component="p" />
             </div>
 
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Register"}
+              Register
             </button>
           </Form>
         )}
@@ -76,3 +86,5 @@ export default function FormikForm() {
     </div>
   );
 }
+
+export default formikForm;
